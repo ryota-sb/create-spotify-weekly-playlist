@@ -21,6 +21,62 @@
         color="grey lighten-5"
       ></v-progress-circular>
     </v-row>
+
+    <!-- 新規プレイリスト作成のモーダル画面 -->
+    <v-row v-if="isSpotifyPlaylist">
+      <v-dialog
+        v-model="dialog"
+        persistent
+        max-width="600px"
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn
+            color="green darken-3"
+            dark
+            fab
+            v-bind="attrs"
+            v-on="on"
+          >
+            <v-icon dark>
+              mdi-plus
+            </v-icon>
+          </v-btn>
+        </template>
+        <v-card>
+          <v-row justify="center">
+            <v-col cols="10">
+              <v-text-field v-model="newPlaylistName" label="新規プレイリスト名"></v-text-field>
+            </v-col>
+          </v-row>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="blue darken-1"
+              text
+              @click="dialog = false"
+            >
+              Close
+            </v-btn>
+            <v-btn
+              color="blue darken-1"
+              text
+              @click="createPlaylist()"
+            >
+              Create
+            </v-btn>
+          </v-card-actions>
+          <v-row justify="center">
+            <v-progress-linear
+              v-if="modalLoading"
+              height="3"
+              indeterminate
+              :size="100"
+              color="green darken-3"
+            ></v-progress-linear>
+          </v-row>
+        </v-card>
+      </v-dialog>
+    </v-row>
   </div>
 </template>
 
@@ -29,6 +85,9 @@ export default {
   data() {
     return {
       spotify_playlist: [],
+      newPlaylistName: null,
+      dialog: false,
+      modalLoading: false
     }
   },
   computed: {
@@ -49,6 +108,22 @@ export default {
       await this.$axios.$post(uri, params).then(res => {
         this.spotify_playlist = res
         console.log(this.spotify_playlist)
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    async createPlaylist() {
+      const params = {
+        newPlaylistName: this.newPlaylistName,
+        spreadSheetName: this.pageId
+      }
+      const uri = "https://j293sn19j1.execute-api.ap-northeast-1.amazonaws.com/default/create-spotify-playlist"
+      this.modalLoading = true
+      await this.$axios.$post(uri, params).then(res => {
+        this.newPlaylistName = null
+        this.dialog = false
+        this.modalLoading = false
+        console.log(res.data)
       }).catch(err => {
         console.log(err)
       })
