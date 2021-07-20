@@ -1,51 +1,46 @@
 <template>
-  <v-row justify="center" align="center">
-    <v-col cols="12" sm="8" md="6">
-      <div class="text-center">
-      </div>
-      <v-card>
-        <v-card-title class="headline" v-text="title" />
-        <v-row justify="center">
-          <v-col cols="10">
-            <v-form>
-              <v-text-field
-              v-model="newPlaylistName"
-                :label="labels[0]"
-              />
-              <v-text-field
-                v-model="spreadSheetName"
-                :label="labels[1]"
-              />
-            </v-form>
-            <v-btn @click="createPlaylist" v-text="labels[2]" />
-          </v-col>
-        </v-row>
-      </v-card>
-    </v-col>
-  </v-row>
+  <div>
+    <!-- ワークシートタイトル取得後、一覧表示 -->
+    <v-row dense v-if="isWorksheetTitleList">
+      <v-col cols="4" md="4" v-for="(worksheet_title, i) in worksheet_title_list" :key="i">
+        <v-card :to="{ name: 'playlists-id', params: { id: worksheet_title } }">
+          <v-card-title>{{ worksheet_title }}</v-card-title>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <!-- ワークシートタイトル取得までのロード画面 -->
+    <v-row v-else align="center" justify="center">
+      <v-progress-circular
+        height="500"
+        indeterminate
+        :size="100"
+        color="grey lighten-5"
+      ></v-progress-circular>
+    </v-row>
+  </div>
 </template>
 
 <script>
 export default {
-  data () {
+  data() {
     return {
-      title: 'プレイリスト生成',
-      labels: ['新規プレイリスト名', 'スプレッドシートのシート名', '作成'],
-      newPlaylistName: null,
-      spreadSheetName: null
+      worksheet_title_list: []
     }
   },
+  computed: {
+    isWorksheetTitleList() {
+      return this.worksheet_title_list.length
+    }
+  },
+  created() {
+    this.getWorksheetTitle()
+  },
   methods: {
-    async createPlaylist() {
-      const params = {
-        newPlaylistName: this.newPlaylistName,
-        spreadSheetName: this.spreadSheetName
-      }
-      const uri = "https://j293sn19j1.execute-api.ap-northeast-1.amazonaws.com/default/create-spotify-playlist"
-      await this.$axios.$post(uri, params).then(res => {
-        this.newPlaylistName = null
-        this.spreadSheetName = null
-        console.log(res.data)
+    async getWorksheetTitle() {
+      const uri = "https://sxqsmtor2i.execute-api.ap-northeast-1.amazonaws.com/default/getspotifyplaylistworksheettitleapi"
+      await this.$axios.$get(uri).then(res =>{
+        this.worksheet_title_list = res
       }).catch(err => {
         console.log(err)
       })
