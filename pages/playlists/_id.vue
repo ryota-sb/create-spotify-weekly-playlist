@@ -14,12 +14,12 @@
 
     <!-- プレイリスト取得までのロード画面 -->
     <v-row v-else align="center" justify="center">
-      <v-progress-circular
-        height="500"
+      <v-progress-linear
+        height="3"
         indeterminate
         :size="100"
-        color="grey lighten-5"
-      ></v-progress-circular>
+        color="green derken-3"
+      ></v-progress-linear>
     </v-row>
 
     <!-- 新規プレイリスト作成のモーダル画面 -->
